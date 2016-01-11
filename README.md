@@ -1,0 +1,3 @@
+# evilscript
+
+Isomorphic React boilerplate.
