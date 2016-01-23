@@ -1,9 +1,11 @@
 import React from 'react';
+import { Router } from 'react-router';
 import { render } from 'react-dom';
 import injectTapEventPlugin from 'react-tap-event-plugin';
-import RootComponent from 'components/RootComponent';
+import { createHistory } from 'history';
 import alt from 'altInit';
 import Iso from 'iso';
+import routes from 'routes';
 
 // Needed for onTouchTap.
 // Can go away when react 1.0 release.
@@ -12,6 +14,6 @@ injectTapEventPlugin();
 window.onload = () => {
   Iso.bootstrap((state, node) => {
     alt.bootstrap(state);
-    render(<RootComponent />, node);
+    render(<Router routes={ routes } history={ createHistory() } />, node);
   });
 };

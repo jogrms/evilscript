@@ -1,9 +1,11 @@
 import express from 'express';
 import React from 'react';
+import routes from 'routes';
 import { renderToString } from 'react-dom/server';
+import * as router from 'react-router';
+import * as history from 'history';
 import alt from 'altInit';
 import Iso from 'iso';
-import RootComponent from 'components/RootComponent';
 
 const app = express();
 
@@ -24,19 +26,31 @@ function wrap(content) {
   );
 }
 
-app.get('/', (req, res) => {
-  const data = {
-    LabelStore: {
-      label: 'Hello World',
-    },
-  };
+app.use((req, res) => {
+  const location = history.createLocation(req.path);
 
-  alt.bootstrap(JSON.stringify(data));
-  const markup = renderToString(<RootComponent />);
-  const iso = new Iso();
-  iso.add(markup, alt.flush());
-  const body = iso.render(markup, alt.flush());
-  res.send(wrap(body));
+  router.match({ routes, location }, (error, redirectLocation, renderProps) => {
+    if (error) {
+      res.status(500).send(error.message);
+    } else if (redirectLocation) {
+      res.redirect(302, redirectLocation.pathname + redirectLocation.search, '/');
+    } else if (renderProps) {
+      const data = {
+        LabelStore: {
+          label: 'Hello World',
+        },
+      };
+
+      alt.bootstrap(JSON.stringify(data));
+      const markup = renderToString(<router.RoutingContext { ...renderProps } />);
+      const iso = new Iso();
+      iso.add(markup, alt.flush());
+      const body = iso.render(markup, alt.flush());
+      res.send(wrap(body));
+    } else {
+      res.status(404).send('Not found');
+    }
+  });
 });
 
 app.listen(3000);
